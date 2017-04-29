@@ -79,6 +79,62 @@ def printMaze(edgeList, start = (0,0), goal = (0,0)):
         print(pHoriz)
         pHoriz = ""
 
+def printMazeCircle(edgeList, diameter):
+    pHoriz = "##"
+    pVert = ""
+    for i in range(len(edgeList[0])):
+        if len(edgeList[0][i]) >= 1:
+            pHoriz += "####"
+        else:
+            pHoriz += "####"
+    print(pHoriz)
+    pHoriz = ""
+
+    currentEdges = []
+    for x in range(len(edgeList)):
+        if len(edgeList[x][0]) >= 1:
+            pHoriz += "##"
+            pVert += "##"
+        else:
+            pHoriz += "##"
+            pVert += "##"
+        for y in range(len(edgeList[x])):
+            for z in range(len(edgeList[x][y])):
+                currentEdges.append(edgeList[x][y][z])
+
+            #If the current one is empty
+            if len(edgeList[x][y]) == 0:
+                pVert += "####"
+                pHoriz += "####"
+            else:
+                if ((x,y+1) in currentEdges):
+                    pVert += "    "
+                else:
+                    pVert += "  ##"
+                    
+                if ((x+1,y) in currentEdges):
+                    pHoriz += "  ##"
+                else:
+                    pHoriz += "####"
+                
+            currentEdges = []
+        print(pVert)
+        pVert = ""
+        print(pHoriz)
+        pHoriz = ""
+
+    pHoriz = "##"
+        
+    for i in range(len(edgeList[0])):
+        if len(edgeList[0][i]) >= 1:
+            pHoriz += "####"
+        else:
+            pHoriz += "####"
+    print(pHoriz)
+    
+                
+            
+
 
 #Creates a maze based on Prim's algorithm
 #We use a fringe and add based on which element is the best to reach our goal
@@ -131,15 +187,13 @@ def PrimMazeRectangle(n,m,start = (0,0)):
 ##            print(edgeList[x][y])
 
     used = []
-##    fringe = [(random.randint(0,n-1), random.randint(0,m-1))]
+
     fringe = [start]
     while (len(fringe) != 0) and len(used) != n*m - 1:
-##        blah = random.randint(0, len(fringe) - 1)
         current = fringe[0]
             
         while current in used:
             fringe.pop(0)
-##            blah = random.randint(0, len(fringe) - 1)
             current = fringe[0]
             
         fringe.pop(0)
@@ -175,57 +229,83 @@ def PrimMazeCircle(diameter = 11):
             if (x-a)**2 + (y-b)**2 - radius**2 <= EPSILON**2:
                 edgeList[x][y].append((x,y))
 
-    for x in range(diameter - 1):
-        for y in range(diameter - 1):
+    for x in range(diameter):
+        for y in range(diameter):
             if len(edgeList[x][y]) == 1:
-                edgeList[x][y].append((x - 1, y))
-                edgeList[x][y].append((x, y - 1))
-                edgeList[x][y].append((x + 1, y))
-                edgeList[x][y].append((x, y + 1))
+                up = max(0, x-1)
+                down = min(diameter-1, x+1)
+                left = max(0, y-1)
+                right = min(diameter-1, y+1)
+                
+                if up == x:
+                    pass
+                else:
+                    edgeList[x][y].append((up, y))
+                if down == x:
+                    pass
+                else:
+                    edgeList[x][y].append((down, y))
+                if right == y:
+                    pass
+                else:
+                    edgeList[x][y].append((x, right))
+                if left == y:
+                    pass
+                else:
+                    edgeList[x][y].append((x, left))
                 
 
     #Holds a list of actual edges being used for the maze
     maze = [[[]for row in range(diameter)] for x in range(diameter)]
 
-    
-
-    printMaze(edgeList)
+    printMazeCircle(edgeList, diameter)
             
-def PrimMazeTriangle(n,m):
-    edgeList = [[[] for x in range(n)] for y in range(m)]
+def PrimMazeTriangle(n):
+    m = (2*n) + 1
+    edgeList = [[[] for y in range(m)] for x in range(n)]
     lineStart = math.floor(m/2)
     lineEnd = math.floor(m/2)
 
     for x in range(n):
         for y in range(m):
-            if y in range(lineStart, lineEnd):
+            if y in range(lineStart, lineEnd) or (y == lineStart and y == lineEnd):
+                up = max(0, x-1)
+                down = min(n-1, x+1)
+                left = max(0, y-1)
+                right = min(m-1, y+1)
+                
                 if y%2 == 0:
-                    edgeList[x][y].append((x+1,y))
-##                    edgeList[x+1][y].append((x,y))
+                    edgeList[x][y].append((down,y))
+                    edgeList[down][y].append((x,y))
                 else:
-                    edgeList[x][y].append((x,y-1))
-                    edgeList[x][y].append((x,y+1))
-                    edgeList[x][y].append((x+1,y))
-##                    
-##                    edgeList[x][y+1].append((x,y))
-##                    edgeList[x+1][y].append((x,y))
-##                    edgeList[x][y-1].append((x,y))
+                    edgeList[x][y].append((x,left))
+                    edgeList[x][y].append((x,right))
+                    edgeList[x][y].append((down,y))
+                    
+                    edgeList[x][right].append((x,y))
+                    edgeList[down][y].append((x,y))
+                    edgeList[x][left].append((x,y))
         if lineStart > 0:
             lineStart -= 1
         if lineEnd < m - 1:
             lineEnd += 1
+    print(lineStart, lineStart)
 
-    for x in range(len(edgeList)):
-        print()
-        for y in range(len(edgeList[x])):
-            print(edgeList[x][y], end="")
-    printMaze(edgeList)
+##    for x in range(len(edgeList)):
+##        print()
+##        for y in range(len(edgeList[x])):
+##            print(lenedgeList[x][y], end = "")
+##            pass
+            
+    printMazeCircle(edgeList, m)
 
     
     
-PrimMazeRectangle(5,5,(0,0))
-PrimMazeCircle(11)
-PrimMazeTriangle(10, 20)
+PrimMazeRectangle(10,10,(0,0))
+print()
+PrimMazeCircle(15)
+print()
+PrimMazeTriangle(15)
 
 ##First Prim Maze (10,10)
 ##+--+--+--+--+--+--+--+--+--+--+

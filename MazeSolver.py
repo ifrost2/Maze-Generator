@@ -47,7 +47,7 @@ testA = [[[(1,0)],[(1,1)]],
 ##PRINT RECTANGULAR MAZE####################################################
 
 
-def printMaze(edgeList, start = (0,0), goal = (0,0)):
+def printMaze(edgeList, start, goal):
     pHoriz = "##"
     for i in range(len(edgeList[0])):
         pHoriz += "####"
@@ -62,13 +62,21 @@ def printMaze(edgeList, start = (0,0), goal = (0,0)):
         for y in range(len(edgeList[x])):
             for z in range(len(edgeList[x][y])):
                 currentEdges.append(edgeList[x][y][z])
-##            if ((x,y) == goal):
-##                pVert += " G|"
-##                continue
-##            if ((x,y) == start):
-##                pVert += " S|"
-##                continue
-            if ((x,y+1) in currentEdges):
+            if ((x,y) == goal):
+                pVert += "GG"
+                if ((x,y+1) in currentEdges):
+                    pVert += "  "
+                else:
+                    pVert += "##"
+                
+            elif ((x,y) == start):
+                pVert += "SS"
+                if ((x,y+1) in currentEdges):
+                    pVert += "  "
+                else:
+                    pVert += "##"
+                    
+            elif ((x,y+1) in currentEdges):
                 pVert += "    "
             else:
                 pVert += "  ##"
@@ -85,7 +93,7 @@ def printMaze(edgeList, start = (0,0), goal = (0,0)):
 
 ##PRINT CIRCULAR MAZE####################################################
 
-def printMazeCircle(edgeList, diameter):
+def printMazeCircle(edgeList, diameter, start, goal):
     pHoriz = "##"
     pVert = ""
     for i in range(len(edgeList[0])):
@@ -102,8 +110,31 @@ def printMazeCircle(edgeList, diameter):
             for z in range(len(edgeList[x][y])):
                 currentEdges.append(edgeList[x][y][z])
 
+
+            #Print goal and Start
+            if ((x,y) == goal):
+                if ((x,y+1) in currentEdges):
+                    pVert += "GG  "
+                else:
+                    pVert += "GG##"
+                    
+                if ((x+1,y) in currentEdges):
+                    pHoriz += "  ##"
+                else:
+                    pHoriz += "####"
+                
+            elif ((x,y) == start):
+                if ((x,y+1) in currentEdges):
+                    pVert += "SS  "
+                else:
+                    pVert += "SS##"
+                if ((x+1,y) in currentEdges):
+                    pHoriz += "  ##"
+                else:
+                    pHoriz += "####"
+                    
             #If the current one is empty
-            if len(edgeList[x][y]) == 0:
+            elif len(edgeList[x][y]) == 0:
                 pVert += "####"
                 pHoriz += "####"
             else:
@@ -125,7 +156,7 @@ def printMazeCircle(edgeList, diameter):
 
 
 ##PRINT TRIANGULAR MAZE####################################################
-def printMazeTriangle(edgeList, n, m):
+def printMazeTriangle(edgeList, start, goal):
     pHoriz = "##"
     pVert = ""
     for i in range(len(edgeList[0])):
@@ -143,9 +174,30 @@ def printMazeTriangle(edgeList, n, m):
             for z in range(len(edgeList[x][y])):
                 currentEdges.append(edgeList[x][y][z])
 
+
+            #Print goal and Start
+            if ((x,y) == goal):
+                if ((x,y+1) in currentEdges):
+                    pVert = "GG  " + pVert
+                else:
+                    pVert = "GG##" + pVert
+                if ((x+1,y) in currentEdges):
+                    pHoriz = "  ##" + pHoriz
+                else:
+                    pHoriz = "####" + pHoriz
+                
+            elif ((x,y) == start):
+                if ((x,y+1) in currentEdges):
+                    pVert = "SS  " + pVert
+                else:
+                    pVert = "SS##" + pVert
+                if ((x+1,y) in currentEdges):
+                    pHoriz = "  ##" + pHoriz
+                else:
+                    pHoriz = "####" + pHoriz
                 
             #If the current one is empty
-            if len(edgeList[x][y]) == 0:
+            elif len(edgeList[x][y]) == 0:
                 pVert = "####" + pVert
                 pHoriz = "####" + pHoriz
             else:
@@ -166,6 +218,61 @@ def printMazeTriangle(edgeList, n, m):
         pHoriz = ""
     print(pAll)
 
+
+##SORT THE FRINGE###########################################################
+##Takes an edgeList, and the dimensions of the total maze and sorts
+##The fringe based on decreasing order of cost: n/x + m/y
+def sortFringeRect(fringe, n, m):
+    costs = []
+    for x in fringe:
+        costs.append(x[0]/n + x[1]/m)
+
+    new = zip(costs, fringe)
+    test = list(new)
+    test.sort()
+    test = reversed(test)
+    fringe = [x for y, x in test]
+    
+    return fringe
+
+##Doesn't have as much effect on the shape of the maze as with the rectangle
+def sortFringeOther(fringe, n, m):
+    costs = []
+    for x in fringe:
+        costs.append(x[0][0]/n + x[0][1]/m)
+        
+    new = zip(costs, fringe)
+    test = list(new)
+    test.sort()
+    test = reversed(test)
+    fringe = [x for y, x in test]
+    
+    return fringe
+
+##FIND THE GOAL#############################################################
+def findGoal(maze, start, searched):
+    toDo = [(start, 0)]
+    choices = []
+    highest = (start, 0)
+    while len(toDo) != 0:
+        current = toDo[0]
+        toDo.pop(0)
+        if current[1] > highest[1]:
+            highest = current
+        choices = (maze[current[0][0]][current[0][1]])
+        searched.append(current[0])
+        for choice in choices:
+            if choice in searched:
+                pass
+            else:
+                toDo.append((choice, current[1] + 1))
+                searched.append(choice)
+                
+    return highest[0]
+        
+            
+
+
     
                 
             
@@ -174,7 +281,8 @@ def printMazeTriangle(edgeList, n, m):
 #Creates a maze based on Prim's algorithm
 #We use a fringe and add based on which element is the best to reach our goal
 #Initially, we used random weight, essentially, and we plan to move to
-#Works with odd and even numbers
+#Works with odd and even numbers.
+#Seems like not sorting the fringe could be more of a confusing maze.
 def PrimMazeRectangle(n,m,start = (0,0)):
 
     
@@ -209,6 +317,7 @@ def PrimMazeRectangle(n,m,start = (0,0)):
     #While there are still edges to be discovered and all of the
     #nodes have not been visited
     while (len(fringe) != 0) and len(used) != n*m - 1:
+        fringe = sortFringeRect(fringe, n,m)
         current = fringe[0]
 
         #Don't visit a node that has already been added to the maze
@@ -238,7 +347,9 @@ def PrimMazeRectangle(n,m,start = (0,0)):
                 pass
             else:
                 fringe.append(i)
-    printMaze(maze, (0,0), (n-1, m-1))
+                
+    goal = findGoal(maze, start, [])
+    printMaze(maze, start, goal)
 
 
 ##MAKE A CIRCULAR MAZE ###################################################
@@ -305,6 +416,7 @@ def PrimMazeCircle(diameter = 11):
     #Have each element in the fringe keep track of where it came from
     fringe = [(start, (0,0))]
     while (len(fringe) != 0):
+        sortFringeOther(fringe, diameter, diameter)
         current = fringe[0][0]
 
         #Don't add anything already in used or if it isn't in the circle
@@ -390,8 +502,13 @@ def PrimMazeCircle(diameter = 11):
                 used.append(current)
                 usedEdges.append((current, nextNode)) 
 
+    ##Find the farthest point from the start
+    goal = findGoal(maze, start, [])
+    
     #Print the maze
-    printMazeCircle(maze, diameter)
+    printMazeCircle(maze, diameter, start, goal)
+
+
 
 ##MAKE A TRIANGULAR MAZE ###################################################
 ## Works with odd and even numbers as m is always calculated to be odd
@@ -400,6 +517,7 @@ def PrimMazeTriangle(n):
     edgeList = [[[] for y in range(m)] for x in range(n)]
     lineStart = math.floor(m/2)
     lineEnd = math.floor(m/2)
+    start = (0, lineStart)
 
     #Add only the current element to the edgeList initially
     #so we can check for lengths when adding all possibilities
@@ -457,6 +575,7 @@ def PrimMazeTriangle(n):
     #Have each element in the fringe keep track of where it came from
     fringe = [((0,math.floor(m/2)), (0,0))]
     while (len(fringe) != 0):
+        sortFringeOther(fringe, n, m)
         current = fringe[0][0]
 
         #Don't add anything already in used or if it isn't in the circle
@@ -534,15 +653,19 @@ def PrimMazeTriangle(n):
                 maze[current[0]][current[1]].append(nextNode)
                 maze[nextNode[0]][nextNode[1]].append(current)
                 used.append(current)
-                usedEdges.append((current, nextNode)) 
-    printMazeTriangle(maze,n,m)
+                usedEdges.append((current, nextNode))
+
+    ##Find the farthest point from the start
+    goal = findGoal(maze, start, [])
+    
+    printMazeTriangle(maze, start, goal)
 
     
-PrimMazeRectangle(7,7,(0,0))
+PrimMazeRectangle(15,15)
 print()
 PrimMazeCircle(15)
 print()
-PrimMazeTriangle(15)
+PrimMazeTriangle(7)
 
 ##First Prim Maze (10,10)
 ##+--+--+--+--+--+--+--+--+--+--+

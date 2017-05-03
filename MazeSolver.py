@@ -353,6 +353,8 @@ def PrimMazeRectangle(n,m,start = (0,0)):
 
 
 ##MAKE A CIRCULAR MAZE ###################################################
+##For figuring out an algorithm to design a circle
+##http://stackoverflow.com/questions/22777049/how-can-i-draw-a-circle-in-a-data-array-map-in-python
 ##Works best if using odd numbers
 def PrimMazeCircle(diameter = 11):
     edgeList = [[[] for x in range(diameter)] for y in range(diameter)]
@@ -665,7 +667,7 @@ PrimMazeRectangle(15,15)
 print()
 PrimMazeCircle(15)
 print()
-PrimMazeTriangle(7)
+PrimMazeTriangle(8)
 
 ##First Prim Maze (10,10)
 ##+--+--+--+--+--+--+--+--+--+--+
@@ -788,6 +790,3 @@ PrimMazeTriangle(7)
 ##    printMaze(maze)
 ##                
 ##randomMaze(10, 10)
-
-##For figuring out an algorithm to design a circle
-##http://stackoverflow.com/questions/22777049/how-can-i-draw-a-circle-in-a-data-array-map-in-python
